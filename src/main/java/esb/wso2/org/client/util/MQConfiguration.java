@@ -11,24 +11,38 @@ public class MQConfiguration {
 	private Properties properties;
 	private String qManger;
 	private String queue;
+	private String topic;
 	private String channel;
 	private String userName;
 	private String password;
 	private int transportType;
+	private int receiveTimeout;
+
+
 	private MQConfiguration(MQConfiguration.MQConfigurationBuilder builder){
 		this.port=builder.port;
 		this.host=builder.host;
 		this.qManger=builder.qManger;
 		this.queue=builder.queue;
+		this.topic=builder.topic;
 		this.userName=builder.userName;
 		this.password=builder.password;
 		this.channel=builder.channel;
 		this.properties=builder.properties;
 		this.transportType=builder.transportType;
+		this.receiveTimeout=builder.receiveTimeout;
+	}
+
+	public int getReceiveTimeout() {
+		return receiveTimeout;
 	}
 
 	public int getTransportType() {
 		return transportType;
+	}
+
+	public String getTopic() {
+		return topic;
 	}
 
 	public int getPort() {
@@ -66,9 +80,11 @@ public class MQConfiguration {
 	public static class MQConfigurationBuilder{
 		private final int port;
 		private final String host;
+		private final int receiveTimeout;
 		private Properties properties;
 		private String qManger;
 		private String queue;
+		private String topic;
 		private String channel;
 		private String userName;
 		private String password;
@@ -110,8 +126,22 @@ public class MQConfiguration {
 				this.queue = properties.getProperty(
 						MQConstants.QUEUE);
 			}else{
-				this.queue="LocalQueue1";
+				this.queue=null;
 			}
+
+			if(properties.getProperty(MQConstants.QUEUE)!=null) {
+				this.topic = properties.getProperty(
+						MQConstants.TOPIC);
+			}else{
+				this.topic=null;
+			}
+			if(properties.getProperty(MQConstants.RECEIVE_TIMEOUT)!=null) {
+				this.receiveTimeout = Integer.parseInt(properties.getProperty(
+						MQConstants.RECEIVE_TIMEOUT));
+			}else{
+				this.receiveTimeout=1000;
+			}
+
 
 			if(properties.getProperty(MQConstants.CHANNEL)!=null) {
 				this.channel = properties.getProperty(
