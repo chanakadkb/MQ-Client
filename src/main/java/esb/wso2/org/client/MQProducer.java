@@ -52,7 +52,8 @@ public class MQProducer {
 			              Message.DEFAULT_PRIORITY,
 			              Message.DEFAULT_TIME_TO_LIVE);
 		}catch (JMSException e){
-			System.out.println("Exception:message sending failed :"+e);
+			System.out.println("Exception:message sending failed :");
+			e.printStackTrace();
 			return;
 		}
 	}

@@ -17,7 +17,8 @@ public class MQConfiguration {
 	private String password;
 	private int transportType;
 	private int receiveTimeout;
-
+	private String ciphersuit;
+	private Boolean flipRequired;
 
 	private MQConfiguration(MQConfiguration.MQConfigurationBuilder builder){
 		this.port=builder.port;
@@ -31,10 +32,20 @@ public class MQConfiguration {
 		this.properties=builder.properties;
 		this.transportType=builder.transportType;
 		this.receiveTimeout=builder.receiveTimeout;
+		this.ciphersuit=builder.ciphersuit;
+		this.flipRequired=builder.flipRequired;
 	}
 
 	public int getReceiveTimeout() {
 		return receiveTimeout;
+	}
+
+	public String getCiphersuit() {
+		return ciphersuit;
+	}
+
+	public Boolean getFlipRequired() {
+		return flipRequired;
 	}
 
 	public int getTransportType() {
@@ -89,6 +100,8 @@ public class MQConfiguration {
 		private String userName;
 		private String password;
 		private int transportType;
+		private String ciphersuit;
+		private Boolean flipRequired;
 
 		public MQConfigurationBuilder() {
 
@@ -99,6 +112,18 @@ public class MQConfiguration {
 						MQConstants.PORT));
 			}else{
 				this.port=1414;
+			}
+			if(properties.getProperty(MQConstants.CIPHERSUIT)!=null) {
+				this.ciphersuit = properties.getProperty(
+						MQConstants.CIPHERSUIT);
+			}else{
+				this.ciphersuit="SSL_RSA_WITH_3DES_EDE_CBC_SHA";
+			}
+			if(properties.getProperty(MQConstants.FLIP_REQUIRED)!=null) {
+				this.flipRequired = Boolean.parseBoolean(properties.getProperty(
+						MQConstants.FLIP_REQUIRED));
+			}else{
+				this.flipRequired=false;
 			}
 
 			if(properties.getProperty(MQConstants.HOST)!=null) {

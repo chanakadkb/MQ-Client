@@ -47,7 +47,8 @@ public class MQConsumer{
 			consumer=session.createConsumer(queue);
 			consumer.setMessageListener(new MQListener());
 		}catch (JMSException e){
-			System.out.println("Exception:connection initiating failed :"+e);
+			System.out.println("Exception:connection initiating failed :");
+			e.printStackTrace();
 			return;
 		}
 	}
