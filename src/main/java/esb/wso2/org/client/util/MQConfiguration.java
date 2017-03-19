@@ -19,6 +19,11 @@ public class MQConfiguration {
 	private int receiveTimeout;
 	private String ciphersuit;
 	private Boolean flipRequired;
+	private boolean sslEnable;
+	private String trustStore;
+	private String trustPassword;
+	private String keyStore;
+	private String keyPassword;
 
 	private MQConfiguration(MQConfiguration.MQConfigurationBuilder builder){
 		this.port=builder.port;
@@ -34,6 +39,11 @@ public class MQConfiguration {
 		this.receiveTimeout=builder.receiveTimeout;
 		this.ciphersuit=builder.ciphersuit;
 		this.flipRequired=builder.flipRequired;
+		this.sslEnable=builder.sslEnable;
+		this.trustStore=builder.trustStore;
+		this.trustPassword=builder.trustPassword;
+		this.keyStore=builder.keyStore;
+		this.keyPassword=builder.keyPassword;
 	}
 
 	public int getReceiveTimeout() {
@@ -46,6 +56,26 @@ public class MQConfiguration {
 
 	public Boolean getFlipRequired() {
 		return flipRequired;
+	}
+
+	public boolean isSslEnable() {
+		return sslEnable;
+	}
+
+	public String getTrustStore() {
+		return trustStore;
+	}
+
+	public String getTrustPassword() {
+		return trustPassword;
+	}
+
+	public String getKeyStore() {
+		return keyStore;
+	}
+
+	public String getKeyPassword() {
+		return keyPassword;
 	}
 
 	public int getTransportType() {
@@ -100,8 +130,14 @@ public class MQConfiguration {
 		private String userName;
 		private String password;
 		private int transportType;
+		//SSL properties
 		private String ciphersuit;
-		private Boolean flipRequired;
+		private boolean flipRequired;
+		private boolean sslEnable;
+		private String trustStore=null;
+		private String trustPassword=null;
+		private String keyStore=null;
+		private String keyPassword=null;
 
 		public MQConfigurationBuilder() {
 
@@ -113,6 +149,13 @@ public class MQConfiguration {
 			}else{
 				this.port=1414;
 			}
+			if(properties.getProperty(MQConstants.SSL_ENABLE)!=null) {
+				this.sslEnable = Boolean.parseBoolean(properties.getProperty(
+						MQConstants.SSL_ENABLE));
+			}else{
+				this.sslEnable=false;
+			}
+
 			if(properties.getProperty(MQConstants.CIPHERSUIT)!=null) {
 				this.ciphersuit = properties.getProperty(
 						MQConstants.CIPHERSUIT);
@@ -124,6 +167,27 @@ public class MQConfiguration {
 						MQConstants.FLIP_REQUIRED));
 			}else{
 				this.flipRequired=false;
+			}
+			if(properties.getProperty(MQConstants.TRUST_STORE)!=null) {
+				this.trustStore = properties.getProperty(
+						MQConstants.TRUST_STORE);
+			}else{
+				this.trustStore=null;
+			}if(properties.getProperty(MQConstants.TRUST_PASSWORD)!=null) {
+				this.trustPassword = properties.getProperty(
+						MQConstants.TRUST_PASSWORD);
+			}else{
+				this.trustPassword=null;
+			}if(properties.getProperty(MQConstants.KEYSTORE_STORE)!=null) {
+				this.keyStore = properties.getProperty(
+						MQConstants.KEYSTORE_STORE);
+			}else{
+				this.keyStore=null;
+			}if(properties.getProperty(MQConstants.KEY_PASSWORD)!=null) {
+				this.keyPassword = properties.getProperty(
+						MQConstants.KEY_PASSWORD);
+			}else{
+				this.keyPassword=null;
 			}
 
 			if(properties.getProperty(MQConstants.HOST)!=null) {
