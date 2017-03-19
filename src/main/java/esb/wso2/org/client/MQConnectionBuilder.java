@@ -35,13 +35,6 @@ public class MQConnectionBuilder {
 	private MQQueueConnectionFactory conFactory;
 	private MQConnectionBuilder() throws Exception{
 
-		/** these properties can be set in runtime **/
-		/*System.setProperty("javax.net.ssl.trustStore",
-		                   "/home/chanaka/mqm/trustStore.jks");
-		System.setProperty("javax.net.ssl.trustStorePassword","lucy");
-		System.setProperty("javax.net.ssl.trustStoreType","jks");*/
-		System.setProperty("com.ibm.mq.cfg.useIBMCipherMappings",Boolean.toString(false));
-
 		this.config=new MQConfiguration.MQConfigurationBuilder().build();
 
 		//Configuring connectionFactory
