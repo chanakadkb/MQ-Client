@@ -51,7 +51,7 @@ public class MQProducer {
 			producer.send(message,Message.DEFAULT_DELIVERY_MODE,
 			              Message.DEFAULT_PRIORITY,
 			              Message.DEFAULT_TIME_TO_LIVE);
-		}catch (JMSException e){
+		}catch (Exception e){
 			System.out.println("Exception:message sending failed :");
 			e.printStackTrace();
 			return;

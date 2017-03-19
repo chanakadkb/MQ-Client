@@ -36,10 +36,10 @@ public class MQConnectionBuilder {
 	private MQConnectionBuilder() throws Exception{
 
 		/** these properties can be set in runtime **/
-		System.setProperty("javax.net.ssl.trustStore",
+		/*System.setProperty("javax.net.ssl.trustStore",
 		                   "/home/chanaka/mqm/trustStore.jks");
 		System.setProperty("javax.net.ssl.trustStorePassword","lucy");
-		System.setProperty("javax.net.ssl.trustStoreType","jks");
+		System.setProperty("javax.net.ssl.trustStoreType","jks");*/
 		System.setProperty("com.ibm.mq.cfg.useIBMCipherMappings",Boolean.toString(false));
 
 		this.config=new MQConfiguration.MQConfigurationBuilder().build();
@@ -53,8 +53,11 @@ public class MQConnectionBuilder {
 		conFactory.setTransportType(config.getTransportType());
 
 		//Configuring SSL properties
-		conFactory.setSSLCipherSuite(config.getCiphersuit());  //Ciperset
-		conFactory.setSSLFipsRequired(config.getFlipRequired());
+		if(config.isSslEnable()) {
+			conFactory.setSSLSocketFactory(createSSLContext().getSocketFactory());
+			conFactory.setSSLCipherSuite(config.getCiphersuit());  //Ciperset
+			conFactory.setSSLFipsRequired(config.getFlipRequired());
+		}
 	}
 	public static MQConnectionBuilder getInstance(){
 		if(instance==null){
@@ -105,7 +108,7 @@ public class MQConnectionBuilder {
 	 * @return QueueConnection
 	 * @throws Exception
 	 */
-	public QueueConnection getConnection() throws JMSException{
+	public QueueConnection getConnection() throws Exception{
 		if(connection==null){
 			connection=conFactory.createQueueConnection(config.getUserName(),config.getPassword());
 			connection.start();
@@ -129,6 +132,37 @@ public class MQConnectionBuilder {
 
 	public MQConfiguration getConfig() {
 		return config;
+	}
+
+	public SSLContext createSSLContext(){
+		try {
+			Class.forName("com.sun.net.ssl.internal.ssl.Provider");
+
+			KeyStore ks = KeyStore.getInstance("JKS");
+			ks.load(new FileInputStream(config.getKeyStore()), config.getKeyPassword().toCharArray());
+
+			KeyStore trustStore = KeyStore.getInstance("JKS");
+			trustStore.load(new FileInputStream(config.getTrustStore()), config.getTrustPassword().toCharArray());
+
+			TrustManagerFactory trustManagerFactory =
+					TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
+			KeyManagerFactory keyManagerFactory =
+					KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+			trustManagerFactory.init(trustStore);
+			keyManagerFactory.init(ks, config.getKeyPassword().toCharArray());
+
+			SSLContext sslContext = SSLContext.getInstance("SSLv3");
+
+			sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
+			                null);
+
+			return sslContext;
+		}catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
