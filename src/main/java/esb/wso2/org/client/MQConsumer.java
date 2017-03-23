@@ -1,64 +1,54 @@
 package esb.wso2.org.client;
 
-/**
- * Created by chanaka on 3/12/17.
- */
-
-import com.ibm.mq.jms.MQQueue;
+import com.ibm.mq.MQGetMessageOptions;
+import com.ibm.mq.MQMessage;
+import com.ibm.mq.MQQueue;
+import com.ibm.mq.MQQueueManager;
+import com.ibm.mq.MQTopic;
+import com.ibm.mq.constants.CMQC;
 import esb.wso2.org.client.util.MQConfiguration;
 
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.QueueConnection;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-
-/**
- * Listening to a queue;
- */
 public class MQConsumer{
 
 	private MQConnectionBuilder connectionBuilder;
 	private MQConfiguration config;
-	private QueueConnection connection;
-	private QueueSession session;
-	private MessageConsumer consumer;
+	private MQQueueManager manager;
+	private MessageHandler handler;
 
-	public MQConsumer() {
+	public MQConsumer(MessageHandler handler) {
 		this.connectionBuilder = MQConnectionBuilder.getInstance();
 		this.config= connectionBuilder.getConfig();
+		this.manager=connectionBuilder.getQueueManager();
+		this.handler=handler;
 	}
 
-	/**
-	 * Starting asynchronous event listener
-	 */
-	public void start(){
-		try {
-			connection = connectionBuilder.getConnection();
-			if(connection==null){
-				return;
-			}
-			session=connection.createQueueSession(false,Session.AUTO_ACKNOWLEDGE);
-			if(session==null){
-				connectionBuilder.closeConnection();
-				return;
-			}
-			MQQueue queue= connectionBuilder.getDestination();
-			consumer=session.createConsumer(queue);
-			consumer.setMessageListener(new MQListener());
-		}catch (Exception e){
-			System.out.println("Exception:connection initiating failed :");
-			e.printStackTrace();
+	public void consume() throws Exception{
+		MQQueue readableQueue;
+		if(!manager.isConnected()){
 			return;
 		}
+		readableQueue = manager.accessQueue(config.getQueue(), CMQC.MQRC_READ_AHEAD_MSGS);
+		if(readableQueue==null)
+			return;
+		MQMessage message=new MQMessage();
+		MQGetMessageOptions gmo = new MQGetMessageOptions();
+
+		readableQueue.get(message,gmo);
+		handler.handle(message);
+		readableQueue.close();
 	}
-	public void stop(){
-		if(consumer!=null) {
-			try {
-				consumer.close();
-			} catch (JMSException e) {
-				e.printStackTrace();
+
+	/*public MQTopic getPublisherTopic(){
+		try {
+			if (publisher == null || !publisher.isOpen()) {
+				publisher = queueManager.accessTopic(config.getTopic(),"TOPICNAME",CMQC
+						.MQTOPIC_OPEN_AS_PUBLICATION,CMQC.MQOO_OUTPUT);
 			}
+			return publisher;
+		}catch (Exception e){
+			System.err.println("ERROR:Topic_creation_failed :"+e);
+			return null;
 		}
-	}
+	}*/
+
 }

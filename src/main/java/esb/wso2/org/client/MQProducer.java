@@ -1,61 +1,57 @@
+
 package esb.wso2.org.client;
 
-import com.ibm.mq.jms.MQQueue;
+import com.ibm.mq.MQMessage;
+import com.ibm.mq.MQPutMessageOptions;
+import com.ibm.mq.MQQueue;
+import com.ibm.mq.MQQueueManager;
+import com.ibm.mq.MQTopic;
+import com.ibm.mq.constants.CMQC;
 import esb.wso2.org.client.util.MQConfiguration;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.QueueConnection;
-import javax.jms.QueueReceiver;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
 /**
  * Created by chanaka on 3/12/17.
  */
+
 public class MQProducer {
 
-	private MessageHandler handler;
-	private QueueReceiver receiver;
 	private MQConnectionBuilder connectionBuilder;
 	private MQConfiguration config;
-	private QueueConnection connection;
-	private QueueSession session;
+	private MQQueueManager manager;
 
 	public MQProducer() {
 		this.connectionBuilder = MQConnectionBuilder.getInstance();
 		this.config= connectionBuilder.getConfig();
+		this.manager=connectionBuilder.getQueueManager();
 	}
 
-	/**
-	 * Sending messages to queue
-	 */
-	public void send(String msg){
-		try {
-			connection = connectionBuilder.getConnection();
-			if(connection==null){
-				return;
-			}
-			session=connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-			if(session==null){
-				connectionBuilder.closeConnection();
-				return;
-			}
-			MQQueue destination= connectionBuilder.getDestination();
-			MessageProducer producer=session.createProducer(destination);
-			TextMessage message=session.createTextMessage();
-			message.setText(msg);
-			producer.send(message,Message.DEFAULT_DELIVERY_MODE,
-			              Message.DEFAULT_PRIORITY,
-			              Message.DEFAULT_TIME_TO_LIVE);
-		}catch (Exception e){
-			System.out.println("Exception:message sending failed :");
-			e.printStackTrace();
+	public void send(String msg) throws Exception{
+		MQQueue queue;
+		queue = manager.accessQueue(config.getQueue(), CMQC.MQOO_OUTPUT);
+		if(queue==null){
 			return;
 		}
+		MQMessage mqMessage=new MQMessage();
+		mqMessage.writeString(msg);
+		MQPutMessageOptions pmo = new MQPutMessageOptions();
+		queue.put(mqMessage,pmo);
+		queue.close();
 	}
+
+/*
+	public MQTopic getSubscriberTopic(){
+		try {
+			if (subcriber == null || !subcriber.isOpen()) {
+				subcriber = queueManager.accessTopic(config.getTopic(),"TOPICNAME",CMQC
+						.MQTOPIC_OPEN_AS_SUBSCRIPTION,CMQC.MQSO_CREATE);
+			}
+			return subcriber;
+		}catch (Exception e){
+			System.err.println("ERROR:Topic_creation_failed :"+e);
+			return null;
+		}
+	}
+*/
 
 }

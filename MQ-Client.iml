@@ -38,14 +38,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Maven: javax.jms:jms:1.1">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/src/main/resources/lib/jms.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>

@@ -1,14 +1,26 @@
 package esb.wso2.org.client;
 
-import javax.jms.Message;
+import com.ibm.mq.MQMessage;
+import com.ibm.mq.headers.MQDH;
+import com.ibm.mq.headers.MQHeaderList;
+import com.ibm.mq.headers.MQMD;
 
-/**
- * Created by chanaka on 3/12/17.
- */
 public class MessageHandler{
 
 
-	public void handle(Message message){
-		System.out.println("A message received : \n"+message);
+	public void handle(MQMessage message)throws Exception {
+
+		System.out.println("A message received : \n" + new MQHeaderList(message));
+
+		//Print message description
+		MQMD md=new MQMD();
+		md.copyFrom(message);
+		System.out.println(md);
+
+		message.getDataLength();
+		int strLen = message.getDataLength();
+		byte[] strData = new byte[strLen];
+		message.readFully(strData);
+		System.out.println(new String(strData));
 	}
 }
